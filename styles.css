@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+}
+
+.slider {
+  height: 75px;
+  margin: 0 auto;
+  position: relative;
+  width: 98vw;
+}
+
+.slider-track {
+  border-top: 4px solid black;
+  position: absolute;
+  top: calc(50% - 2px);
+  width: 90%;
+}
+
+.slider-handle {
+  background: gray;
+  display: block;
+  height: 75px;
+  position: absolute;
+  width: 50px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+  top: 75px;
+}
+
+.button {
+  background: red;
+  border: 1px solid black;
+  border-radius: 50%;
+  color: white;
+  height: 20vw;
+  line-height: 20vw;
+  text-align: center;
+  width: 20vw;
+}

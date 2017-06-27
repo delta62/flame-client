@@ -4,50 +4,95 @@ import createElement from 'virtual-dom/create-element'
 import diff from 'virtual-dom/diff'
 import patch from 'virtual-dom/patch'
 
+import { uuid } from './uuid'
+import { post } from './http'
+
 (function() {
-  const model = { };
+  const model = {
+    lock:     false,
+    lockId:   uuid(),
+    channels: [ false, false, false ]
+  };
 
   model.present = function(data) {
-    console.log('model present')
+    if (data.channel !== undefined
+        && model.channels[data.channel] !== data.state) {
+      model.channels[data.channel] = data.state
+      const body = { state: data.state, lockId: model.lockId }
+      post(`/burner/channel/${data.channel}`, body)
+    }
+
+    if (data.lock !== undefined && data.lock !== model.lock) {
+      model.lock = data.state
+      const body = {
+        state: data.lock ? 'LOCKED' : 'UNLOCKED',
+        lockId: model.lockId
+      }
+      post('/burner/lock', body)
+    }
+
     state(model)
-    model.persist()
-  }
-
-  model.persist = function() {
-    console.log('model persist')
-  }
-
-  function myAction(data) {
-    console.log('myAction', data)
-    present(data)
+    // model.persist()
   }
 
   function state(model) {
-    console.log('state')
     stateRepresentation(model)
     nap(model)
   }
 
   function nap(model) {
-    console.log('nap')
   }
 
-  function myView(model) {
-    console.log('myView')
-    const dom = h('h1', {
-      'ev-click': myAction
-    }, 'Hello SAM')
+  function appView(model) {
+    const dom = h('div.app', [
+      sliderView(model),
+      fireButtonView(model)
+    ])
     display(dom)
   }
 
+  function sliderView(model) {
+    const dom = h('div.slider', [
+      h('span.slider-track'),
+      h('span.slider-handle', {
+        'ev-click': () => armAction(!model.lock)
+      })
+    ])
+    return dom
+  }
+
+  function fireButtonView(model) {
+    const dom = h('div.buttons', [
+      h('div.button', {
+        'ev-mousedown': () => buttonAction({ channel: 0, state: true }),
+        'ev-mouseup':   () => buttonAction({ channel: 0, state: false })
+      }, [ 'FIRE' ]),
+      h('div.button', {
+        'ev-mousedown': () => buttonAction({ channel: 1, state: true }),
+        'ev-mouseup':   () => buttonAction({ channel: 1, state: false })
+      }, [ 'FIRE' ]),
+      h('div.button', {
+        'ev-mousedown': () => buttonAction({ channel: 2, state: true }),
+        'ev-mouseup':   () => buttonAction({ channel: 2, state: false })
+      }, [ 'FIRE' ])
+    ])
+    return dom
+  }
+
+  function armAction(isLocked) {
+    present({ lock: isLocked })
+  }
+
+  function buttonAction(data) {
+    present(data)
+  }
+
   function present(data) {
-    console.log('present')
     model.present(data)
   }
 
   function stateRepresentation(model) {
-    console.log('stateRepresentation')
-    myView(model)
+    // appView(model)
   }
 
   /**
@@ -56,7 +101,6 @@ import patch from 'virtual-dom/patch'
    */
   let rootNode
   function display(view) {
-    console.log('display')
     if (!rootNode) {
       rootNode = createElement(view)
       const domNode = document.getElementById('view')
@@ -69,5 +113,5 @@ import patch from 'virtual-dom/patch'
 
   // Required for ev-* nodes in h()
   Delegator(document.body)
-  myView(model)
+  appView(model)
 }())
