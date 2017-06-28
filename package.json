@@ -12,7 +12,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "webpack": "^3.0.0",
+    "uglify-es-webpack-plugin": "0.0.2",
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony-v2.8.22",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "webpack": "^2.0.0",
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
